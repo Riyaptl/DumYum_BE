@@ -262,7 +262,7 @@ export const AddBucketCartController =  asyncErrors( async(req:addBucketCartAuth
     // console.log(cart);
     // save changes
     await cart.save()
-    res.status(200).json({"success": true, "message": `${bucket} has been added to your cart successfully`}) 
+    res.status(200).json({"success": true}) 
 })
 
 const removeSubCategroy = async (cart:Cart, subCategory: {[key: string]: any}, quantity: number, next: NextFunction) => {
