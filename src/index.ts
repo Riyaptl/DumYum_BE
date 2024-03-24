@@ -21,8 +21,12 @@ import path from "path";
 const app = express()
 app.use(express.json())
 app.use(cookieParser())
-app.use(credentials)
-app.use(cors(corsOption))
+// app.use(credentials)
+// app.use(cors(corsOption))
+app.use(cors({
+    origin: 'https://dumyum.netlify.app',
+    credentials: true
+  }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
