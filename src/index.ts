@@ -24,7 +24,7 @@ app.use(cookieParser())
 // app.use(credentials)
 // app.use(cors(corsOption))
 app.use(cors({
-    origin: 'https://dumyum.netlify.app',
+    origin: 'https://dumyum.netlify.app' || 'http://localhost:5173',
     credentials: true
   }));
 app.use(bodyParser.urlencoded({ extended: true }));
