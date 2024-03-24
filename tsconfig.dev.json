@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+      "skipLibCheck": true
+    },
+    "ts-node-dev": {
+      "respawn": true,
+      "transpileOnly": true
+      // Add other ts-node-dev options here
+    }
+  }
+  

@@ -1,0 +1,124 @@
+
+export const addminFields = [
+    'Name', 
+    'Email', 
+    'CreatedBy',
+     'CreatedAt', 
+     'UpdatedBy', 
+     'UpdatedAt'
+]
+export const customerFields = [
+    'Name', 
+    'Email', 
+    'Phone',
+    'Address', 
+    'City', 
+    'State', 
+    'Pincode', 
+    'Gender', 
+    'Birthdate', 
+    'MarraigeStatus', 
+    'KidsStatus', 
+    'Anniversary', 
+    'KidsBirthdate', 
+    'OrderStatus', 
+    'QueryStatus', 
+    'TotalAmount', 
+    'TotalNumber', 
+    'CreatedAt', 
+    'UpdatedAt'
+]
+export const queryFields = [
+    'QueryId',
+    'Title',
+    'Description',
+    'Image',
+    'Name', 
+    'Email', 
+    'Phone', 
+    'ClosedBy', 
+    'ClosedAt',
+    'CreatedAt', 
+]
+export const locationFields = [
+    'Pincode',
+    'Area',
+    'City',
+    'State',
+    'Ecd', 
+    'Etd', 
+    'PriceLimit', 
+    'CreatedBy', 
+    'UpdatedBy',
+    'CreatedAt', 
+    'UpdatedAt', 
+]
+export const categoryFields = [
+    'Name', 
+    'Tagline',
+    'Description',
+    'Type',
+    'CreatedBy', 
+    'CreatedAt', 
+    'UpdatedBy', 
+    'UpdatedAt'
+]
+export const subCategoryFields = [
+    'Name', 
+    'Tagline',
+    'Description',
+    'Category',
+    'Etp',
+    'CostPrice',
+    'SellingPrice',
+    'Discount',
+    'DiscountedPrice',
+    'Gst',
+    'GstPrice',
+    'FinalPrice',
+    'Quantity',
+    'Hold',
+    'CreatedBy', 
+    'CreatedAt', 
+    'UpdatedBy', 
+    'UpdatedAt'
+]
+export const ratingFields = [
+    'SubCategory', 
+    'Rating'
+]
+export const commonIngredientFileds = [
+    'Name',
+    'Tagline',
+    'SellingPrice',
+    'Gst',
+    'GstPrice',
+    'FinalPrice',
+    'Type',
+    'Size',
+    'CreatedBy',
+    'UpdatedBy',
+    'CreatedAt',
+    'UpdatedAt'
+]
+
+export const ordersFileds = [
+    'OrderId',
+    'PredefinedPrice',
+    'PredefinedQuantity',
+    'CustomisedPrice',
+    'CustomisedQuantity',
+    'TotalPrice',
+    'TotalQuantity',
+    'Delivered',
+    'OrderStatus',
+    'PaymentStatus',
+    'PaymentMethod',
+    'ExtraDiscount',
+    'DiscountdPrice',
+    'ClosedAt',
+    'ClosedBy',
+    'CreatedAt',
+    'UpdatedBy',
+    'UpdatedAt'
+]
