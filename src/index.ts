@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser")
 
 // Import cors 
 import corsOption from './config/cors'
-// import credentials from './middlewares/allowCookies'
+import credentials from './middlewares/allowCookies'
 const cors = require('cors')
 
 // Import routes
@@ -21,7 +21,7 @@ import path from "path";
 const app = express()
 app.use(express.json())
 app.use(cookieParser())
-// app.use(credentials)
+app.use(credentials)
 app.use(cors(corsOption))
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
