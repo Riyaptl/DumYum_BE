@@ -1,4 +1,4 @@
-const allowedOrigin = ["http://localhost:5173"]
+const allowedOrigin = ["https://dumyum.netlify.app/"]
 
 const corsOption = {
     origin: (origin:any, cb:any) => {
