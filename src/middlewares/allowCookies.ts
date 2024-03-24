@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-const allowed = ['https://dumyum.netlify.app/'];
+const allowed = ['https://dumyum.netlify.app', 'http://localhost:5173'];
 
 const credentials = (req:Request, res:Response, next:NextFunction) => {
     const origin = req.headers.origin || ''
