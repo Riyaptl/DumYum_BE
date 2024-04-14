@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express"
-import { exportDataOrders, orderCloseController, orderCustomerController, orderGetAllController, orderGetOneController, orderUpdatePaymentController, orderUpdatePriceController, orderUpdateTimeController } from "../controllers/orderController"
+import { exportDataOrders, orderCloseController, orderCustomerController, orderGetAllController, orderGetAllCustController, orderGetOneController, orderUpdatePaymentController, orderUpdatePriceController, orderUpdateTimeController } from "../controllers/orderController"
 import { validationMiddleware } from "../middlewares/validationDTO"
 import { GetDataDto } from "../dto/adminDto"
 import { UpdatePaymentOrderDto, UpdatePriceOrderDto, UpdateTimeOrderDto } from "../dto/orderDto"
@@ -19,8 +19,11 @@ const router = express.Router()
 // Apply authentication middleware
 router.use(authenticateUser)
 
+// Get all orders - customer
+router.get('/customer', validationMiddleware(GetDataDto), orderGetAllCustController)
+
 // Get all orders
-router.post('/', validationMiddleware(GetDataDto), orderGetAllController)
+router.get('/', validationMiddleware(GetDataDto), orderGetAllController)
 
 // Get predefined orders of single 
 router.get('/predefined/:id', orderGetOneController)

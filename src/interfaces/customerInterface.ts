@@ -6,7 +6,7 @@ export interface CreateCustomerInterface {
     phone?: string;
     password: string;
     addressDetails?: AddressDetailsInterface[]
-    pincode: string;
+    defaultAddress: string;
     gender?: 'female' | 'male' | 'other';
     birthdate?: string;
     marraigeStatus?: 'married' | 'unmarried';

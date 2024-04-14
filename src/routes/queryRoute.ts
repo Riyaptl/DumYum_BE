@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express"
-import { exportDataQueries, queryCloseController, queryCreateController, queryDeleteController, queryGetAllController, queryGetOneController, queryUploadImagesController, queryViewImagesController } from "../controllers/queryController"
+import { exportDataQueries, queryCloseController, queryCreateController, queryDeleteController, queryGetAllController, queryGetAllCustController, queryGetOneController, queryUploadImagesController, queryViewImagesController, queryViewImagesCustController } from "../controllers/queryController"
 import { validationMiddleware } from "../middlewares/validationDTO"
 import { CreateQueryDto } from "../dto/queryDto"
 import { GetDataDto } from "../dto/adminDto"
@@ -20,17 +20,23 @@ const router = express.Router()
 // Apply authentication middleware
 router.use(authenticateUser)
 
+// Create single query
+router.post('/create', validationMiddleware(CreateQueryDto), queryCreateController)
+
 // Upload images
 router.post('/images/:id', uploadImagesMiddleware, queryUploadImagesController)
 
 // View images
 router.get('/images/:id', queryViewImagesController)
 
-// Create single query
-router.post('/create', validationMiddleware(CreateQueryDto), queryCreateController)
+// View images of customer query
+router.get('/images/cust/:id', queryViewImagesCustController)
+
+// Get all queries of a customer
+router.get('/customer', validationMiddleware(GetDataDto), queryGetAllCustController)
 
 // Get all queries
-router.post('/', validationMiddleware(GetDataDto), queryGetAllController)
+router.post('/', authorizeUser(['admin']), validationMiddleware(GetDataDto), queryGetAllController)
 
 // Get single query
 router.get('/:id', queryGetOneController)

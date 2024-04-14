@@ -58,7 +58,6 @@ const QuerySchema = new Schema<Query>({
         type: String,
         required: true,
         trim: true,
-        unique: true,
     },
     phone: {
         type: String,

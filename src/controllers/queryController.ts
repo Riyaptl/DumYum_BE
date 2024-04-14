@@ -100,7 +100,6 @@ export const squence = async (model: any) => {
 
 
 export const queryCreateController = asyncErrors( async (req:createQueryAuthenticatedInterface, res:Response): Promise<void> => {
-   
     const createQueryInput:CreateQueryInterface = {...req.body}
 
     // create queryId
@@ -136,6 +135,12 @@ export const queryCreateController = asyncErrors( async (req:createQueryAuthenti
     res.status(200).json({"success":true, "message": "Query is raised successfully", query: newQuery})
 })
 
+
+export const queryGetAllCustController = asyncErrors ( async (req:getQueryAuthenticatedInterface, res:Response): Promise<void> => {
+    const customerId = req.user._id
+    const queries = await QueryModel.find({customerId}).select({title:1, queryStatus:1, createdAt:1, description:1, closedAt:1})
+    res.status(200).json({"success":true, queries})
+})
 
 export const queryGetAllController = asyncErrors ( async (req:getQueryAuthenticatedInterface, res:Response): Promise<void> => {
     const queries = await getQueryData(req, QueryModel, 'queryId')
@@ -206,7 +211,7 @@ export const queryViewImagesController = asyncErrors( async (req:any, res:Respon
     const id = req.params.id
     const query = await findId(id, req, next)
     if (query) {
-        if (query.images!.length === 0) return res.status(404).json({ success: false, message: 'No images found for this query' });
+        // if (query.images!.length === 0) return res.status(404).json({ success: false, message: 'No images found for this query' });
 
         // Generate array of image URLs
         const imageUrls: string[] = [];
@@ -220,5 +225,24 @@ export const queryViewImagesController = asyncErrors( async (req:any, res:Respon
     }
 })
 
+
+export const queryViewImagesCustController = asyncErrors( async(req:any, res:Response) => {
+    const id = req.params.id
+    const customerId = req.user._id
+    const query = await QueryModel.findOne({_id:id, customerId})
+    if (query) {
+        // if (query.images!.length === 0) return res.status(404).json({ success: false, message: 'No images found for this query' });
+
+        // Generate array of image URLs
+        const imageUrls: string[] = [];
+        for (const filename of query.images!) {
+            const imageUrl = `/uploads/query/${filename}`; 
+            imageUrls.push(imageUrl);
+        }
+
+        // Send the image URLs as response
+        return res.status(200).json({ success: true, images: imageUrls });
+    }
+})
 
 

@@ -28,24 +28,40 @@ app.use(body_parser_1.default.urlencoded({ extended: true }));
 app.use(body_parser_1.default.json());
 // Serve static files from the uploads directory
 app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, 'uploads')));
+
 // Handle requests for images in the category directory
 app.get('/uploads/category/:filename', (req, res) => {
+    console.log('hit');
     const { filename } = req.params;
     const imagePath = path_1.default.join(__dirname, '../uploads', 'category', filename);
     res.sendFile(imagePath);
 });
+
+
 // Handle requests for images in the special directory
 app.get('/uploads/special/:filename', (req, res) => {
     const { filename } = req.params;
     const imagePath = path_1.default.join(__dirname, '../uploads', 'special', filename);
     res.sendFile(imagePath);
 });
+
+
 // Handle requests for images in the subCategory directory
 app.get('/uploads/subCategory/:filename', (req, res) => {
     const { filename } = req.params;
     const imagePath = path_1.default.join(__dirname, '../uploads', 'subCategory', filename);
     res.sendFile(imagePath);
 });
+
+// Handle requests for images in the subCategory directory
+app.get('/uploads/query/:filename', (req, res) => {
+    const { filename } = req.params;
+    const imagePath = path_1.default.join(__dirname, '../uploads', 'query', filename);
+    console.log(imagePath);
+    res.sendFile(imagePath);
+});
+
+
 // Connect to Database
 (0, db_1.connection)();
 // Server listening

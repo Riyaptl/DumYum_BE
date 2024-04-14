@@ -17,7 +17,7 @@ interface Customer extends Document {
     password: string;
     role: 'customer';
     addressDetails: AddressDetailsInterface[]
-    pincode: string;
+    defaultAddress: Schema.Types.ObjectId | string;
     gender?: 'female' | 'male' | 'other' | null;
     birthdate?: string | null;
     marraigeStatus?: 'married' | 'unmarried' | null;
@@ -91,10 +91,8 @@ const CustomerSchema = new Schema<Customer>({
         default: 'customer'
     },
     addressDetails: [AddressDetailsSchema],
-    pincode: {
-        type: String,
-        required: true,
-        trim: true,
+    defaultAddress: {
+        type: Schema.Types.ObjectId,
     },
     gender: {
         type: String,

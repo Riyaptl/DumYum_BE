@@ -1,9 +1,9 @@
 import express, {Request, Response} from "express"
-import { customerAddAddressController, customerCreateController, customerDeleteController, customerGetAddressController, customerGetAllController, customerGetOneController, customerRemoveAddressController, customerSelectAddressController, customerUpdateAddressController, customerUpdateController, exportDataCustomer, orderHistoryController, queryHistoryController } from "../controllers/customerController"
+import { customerAddAddressController, customerCreateController, customerDeleteController, customerGetAddressController, customerGetAllController, customerGetOneController, customerGetOneWebController, customerRemoveAddressController, customerSelectAddressController, customerUpdateAddressController, customerUpdateController, exportDataCustomer, orderHistoryController, queryHistoryController } from "../controllers/customerController"
 import authorizeUser from "../utils/authorizeUser"
 // import { resetPassController } from "../controllers/adminController"
 import { validationMiddleware } from "../middlewares/validationDTO"
-import { AddressDetailsDto, CreateCustomerDto, SelectPincodeCustomerDto, UpdateCustomerDto } from "../dto/customerDto"
+import { AddressDetailsDto, CreateCustomerDto, UpdateCustomerDto } from "../dto/customerDto"
 import { GetDataDto, ResetPassDto } from "../dto/adminDto"
 import authenticateUser from "../middlewares/authenticateUser"
 const router = express.Router()
@@ -25,23 +25,26 @@ router.post('/', authorizeUser(['admin']), validationMiddleware(GetDataDto), cus
 // Get single customer
 router.get('/:id', customerGetOneController)
 
+// Get single customer - website
+router.get('/info/profile', customerGetOneWebController)
+
 // Update single customer
 router.post('/:id', validationMiddleware(UpdateCustomerDto), customerUpdateController)
 
-// Get default address
+// Get address details
 router.get('/get/address', customerGetAddressController)
-
-// Update address
-router.post('/update/address', validationMiddleware(AddressDetailsDto), customerUpdateAddressController)
 
 // Add address
 router.post('/add/address', validationMiddleware(AddressDetailsDto), customerAddAddressController)
 
-// Remove address
-router.post('/remove/address', validationMiddleware(SelectPincodeCustomerDto), customerRemoveAddressController)
-
 // Select address
-router.post('/select/address', validationMiddleware(SelectPincodeCustomerDto), customerSelectAddressController)
+router.post('/select/address/:id', customerSelectAddressController)
+
+// Update address
+router.post('/update/address/:id', validationMiddleware(AddressDetailsDto), customerUpdateAddressController)
+
+// Remove address
+router.post('/remove/address/:id', customerRemoveAddressController)
 
 // Delete single customer - Dont allow
 router.delete('/:id', customerDeleteController)

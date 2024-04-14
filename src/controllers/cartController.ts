@@ -8,14 +8,15 @@ import { Types } from "mongoose";
 import { LocationModel } from "../models/locationModel";
 import { orderCreateController } from "./orderController";
 import { CreateOrderInterface } from "../interfaces/orderInterface";
+import { IsEmpty } from "class-validator";
 
 interface addCartAuthenticatedInterface extends Request {
-    user: {pincode?: string, _id: string, _doc: any, addressDetails: any, state: string, city: string}
+    user: {pincode?: string, _id: string, _doc: any, addressDetails: any, state: string, city: string, defaultAddress: any}
     body: AddCartInterface
 }
 
 interface addBucketCartAuthenticatedInterface extends Request {
-    user: {pincode?: string, _id: string, _doc: any, addressDetails: any, state: string, city: string}
+    user: {pincode?: string, _id: string, _doc: any, addressDetails: any, state: string, city: string, defaultAddress:any}
     body: AddBucketCartInterface
 }
 
@@ -35,7 +36,7 @@ interface getCartAuthenticatedInterface extends Request {
 
 interface updateAddressCartAuthenticatedDto extends Request {
     user: {_id: string, save: () => {}};
-    body: {pincode: string, houseNumber: string, street: string, nearby: string, city:  string, state:  string}
+    body: {pincode: string, houseNumber: string, street: string, nearby: string, city:  string, state:  string, _id: any}
 }
 
 interface deleteCartAuthenticatedInterface extends Request {
@@ -121,6 +122,31 @@ export const updateEtpCart = async (subCategoryId: string, oldEtp: number, newEt
     }
 }
 
+// update cart addressDetails
+export const updateCartAddressDetails = async (customerId: string, updatedAddress:any, next: NextFunction) => {
+    try {
+        
+       await CartModel.findOneAndUpdate({customerId}, {$set: {addressDetails: updatedAddress}}, {new: true})    
+       return 
+    } catch (error) {
+        next(new ErrorHandler('Internal server error', 500))
+    }
+}
+
+// update cart addressDetails upon removing selected address
+export const updateCartAddressOnRemove= async (customerId: string, id:string, newAddress:any, next: NextFunction) => {
+    try {
+       const cart = await CartModel.findOne({customerId, 'addressDetails._id': id})
+       if (!cart) return
+      
+       cart.addressDetails = newAddress
+       await cart.save()
+       return 
+    } catch (error) {
+        next(new ErrorHandler('Internal server error', 500))
+    }
+}
+
 export const AddCartController =  asyncErrors( async(req:addCartAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
     // // check address if doesn't exist
     // const requiredDetails = ['address', 'city', 'state', 'pincode']
@@ -182,7 +208,8 @@ export const AddCartController =  asyncErrors( async(req:addCartAuthenticatedInt
         cart.etp! += (+subCategory.etp * +quantity)
         
         
-        const addressDetails = req.user.addressDetails.find((obj:any) => obj.pincode === req.user.pincode)
+        const addressDetails = req.user.addressDetails.find((obj:any) => obj._id.toString() == req.user.defaultAddress.toString())
+        
         cart.addressDetails = addressDetails
             // cart.addressDetails = location._id
             // cart.etd = location.etd
@@ -256,7 +283,7 @@ export const AddBucketCartController =  asyncErrors( async(req:addBucketCartAuth
     cart.finalPrice! = cart.totalPrice! + cart.gstPrice!
     cart.etp! += totalEtp
             
-    const addressDetails = req.user.addressDetails.find((obj:any) => obj.pincode === req.user.pincode)
+    const addressDetails = req.user.addressDetails.find((obj:any) => obj._id.toString() == req.user.defaultAddress.toString())
     cart.addressDetails = addressDetails
                 
     // console.log(cart);
@@ -407,8 +434,8 @@ export const GetCartController =  asyncErrors( async(req:getCartAuthenticatedInt
 })
 
 export const UpdateAddressCartController =  asyncErrors( async(req:updateAddressCartAuthenticatedDto, res:Response, next:NextFunction): Promise<void> => {
-    const {houseNumber, street, nearby, city, state, pincode} = req.body
-    const addressDetails = {houseNumber, street, nearby, city, state, pincode}
+    const {houseNumber, street, nearby, city, state, pincode, _id} = req.body
+    const addressDetails = {houseNumber, street, nearby, city, state, pincode, _id}
     const cart = await CartModel.findOneAndUpdate({customerId: req.user._id}, 
         {addressDetails},
         {new:true}
@@ -425,17 +452,21 @@ export const DeleteCartController =  asyncErrors( async(req:deleteCartAuthentica
 
 
 export const CheckoutCartController =  asyncErrors( async(req:checkOutCartAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
-    // check address if doesn't exist
-    const requiredDetails = ['houseNumber', 'street', 'nearby', 'city', 'state', 'pincode']
-    const hasAllProperties = requiredDetails.every(entry => Object.keys(req.user._doc).includes(entry))
-    if (!hasAllProperties) {
-        return next(new ErrorHandler('Address detail is required', 400))
-    }
-    
     // find cart
     let cart = await CartModel.findOne({customerId: req.user._id})
     if (!cart) return next(new ErrorHandler('Cart not found', 404))
+        
+    // check address if doesn't exist
+    const requiredDetails = ['houseNumber', 'street', 'nearby', 'city', 'state', 'pincode', '_id']
+    const address = cart.addressDetails._doc
 
+    for (let i = 0; i < requiredDetails.length; i++) {
+        const element = requiredDetails[i];
+        if (!address.hasOwnProperty(element) || address[element] == ""){
+            return next(new ErrorHandler('Address detail is required', 400))
+        }   
+    }
+    
     // do we deliver 
     const location = await LocationModel.findOne({pincode: cart.addressDetails.pincode})
     if (!location) return next(new ErrorHandler('We currently do not deliver at the location', 404))

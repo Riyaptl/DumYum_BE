@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from "express"
 import { CloseOrderInterface, CreateOrderInterface, UpdatePaymentOrderInterface, UpdatePriceOrderInterface, UpdateTimeOrderInterface } from "../interfaces/orderInterface";
 import { squence } from "./queryController";
 import { asyncErrors } from "../middlewares/catchAsyncErrors";
-import { OrderModel } from "../models/orderModel";
+import { OrderModel, PredefinedOrderSchema } from "../models/orderModel";
 import { ErrorHandler } from "../utils/errorHandler";
 import { GetDataInterface } from "../interfaces/adminInteface";
 import { validEntry } from "./subCategoryController";
@@ -118,11 +118,25 @@ export const orderGetAllController = asyncErrors( async(req:getOrderAuthenticate
     res.status(200).json({"success":true, orders})
 })
 
+export const orderGetAllCustController = asyncErrors( async(req:getOrderAuthenticatedInterface, res:Response): Promise<void> => {
+    const customerId = req.user._id
+    const orders = await OrderModel.find({customerId}).select({orderFor:1, finalPrice:1, totalQuantity:1, createdAt:1, delivered:1, orderStatus:1, paymentStatus:1, paymentMethod:1}).sort({createdAt:-1})
+    res.status(200).json({"success":true, orders})
+})
 
-export const orderGetOneController = asyncErrors( async(req:Request, res:Response): Promise<void> => {
+// export const orderGetProductController = asyncErrors( async(req:getOrderAuthenticatedInterface, res:Response): Promise<void> => {
+//     const customerId = req.user._id
+//     const subCategoryId = req.params.id
+//     const orders = await OrderModel.find({customerId, 'predefinedOrder.subCategoryId': subCategoryId}).sort({createdAt:-1}).select('predefinedOrder')
+//     res.status(200).json({"success":true, orders})
+// })
+
+
+export const orderGetOneController = asyncErrors( async(req:any, res:Response): Promise<void> => {
     const id = req.params.id
-    const predefinedOrders = await OrderModel.findById(id).select('predefinedOrder -_id')
-    res.status(200).json({"success":true, orders: predefinedOrders?.predefinedOrder})
+    const customerId = req.user._id
+    const order = await OrderModel.findOne({_id:id, customerId})
+    res.status(200).json({"success":true, orders: order?.predefinedOrder})
 })
 
 

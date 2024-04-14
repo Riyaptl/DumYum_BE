@@ -67,10 +67,6 @@ export class CreateCustomerDto {
     password!: string;
 
     @IsNotEmpty()
-    @IsString()
-    pincode: string
-
-    @IsNotEmpty()
     @ValidateNested()
     @Type(() => AddressDetailsDto)
     addressDetails?: AddressDetailsDto[];
@@ -115,13 +111,12 @@ export class CreateCustomerDto {
     @IsString({each: true})
     kidsBirthdate?: string[];
     
-    constructor(name: string, email: string, phone: string, password: string, addressDetails: AddressDetailsDto[], pincode: string, gender: string, birthdate: string, marraigeStatus: string, kidsStatus: string, anniversary: string, kidsBirthdate: string[]) {
+    constructor(name: string, email: string, phone: string, password: string, addressDetails: AddressDetailsDto[], gender: string, birthdate: string, marraigeStatus: string, kidsStatus: string, anniversary: string, kidsBirthdate: string[]) {
       this.name = name;
       this.email = email;
       this.phone = phone;
       this.password = password
       this.addressDetails = addressDetails
-      this.pincode = pincode
       this.gender = gender
       this.birthdate = birthdate
       this.marraigeStatus = marraigeStatus
@@ -186,13 +181,3 @@ export class UpdateCustomerDto {
     }
 }
 
-
-export class SelectPincodeCustomerDto {
-  @IsNotEmpty()
-  @IsString()
-  pincode: string
-
-  constructor(pincode: string){
-    this.pincode = pincode
-  }
-}

@@ -7,6 +7,7 @@ import { customerFields } from "../headers"
 import { CreateCustomerInterface, UpdateCustomerInterface } from "../interfaces/customerInterface"
 import { GetDataInterface } from "../interfaces/adminInteface"
 import { updateQuery } from "./queryController"
+import { updateCartAddressDetails, updateCartAddressOnRemove } from "./cartController"
 const {Parser} = require("json2csv")
 
 
@@ -14,6 +15,10 @@ const {Parser} = require("json2csv")
 export interface createCustomerAuthenticatedDto extends Request {
     user: {name: string};
     body: CreateCustomerInterface
+}
+
+export interface getWebCustomerAuthenticatedDto extends Request {
+    user: {_id: string};
 }
 
 export interface updateCustomerAuthenticatedDto extends Request {
@@ -72,10 +77,11 @@ export const customerCreateController = async (req:createCustomerAuthenticatedDt
 
         // check email duplication with admin
         const admin = await findEmailAdmin(createCustomerInput.email, next)
-        if (admin) return next( new ErrorHandler('Email Id is taken', 409) )
+        if (admin) return next( new ErrorHandler('Email Id is taken', 409))
 
         // create customer        
         const newCustomer = new CustomerModel(createCustomerInput)
+        newCustomer.defaultAddress = newCustomer.addressDetails[0]._id
         await newCustomer.save()
         const custId = newCustomer._id.toString()
         return custId
@@ -97,6 +103,14 @@ export const customerGetAllController = asyncErrors( async(req:Request<{},{},Get
 
 export const customerGetOneController = asyncErrors( async(req:Request, res:Response, next:NextFunction): Promise<void> => {
     const id = req.params.id
+    const customer = await findId(id, req, next)
+    if(customer){
+        res.status(200).json({"success": true, customer})
+    }
+})
+
+export const customerGetOneWebController = asyncErrors( async(req:getWebCustomerAuthenticatedDto, res:Response, next:NextFunction): Promise<void> => {
+    const id = req.user._id  
     const customer = await findId(id, req, next)
     if(customer){
         res.status(200).json({"success": true, customer})
@@ -129,41 +143,22 @@ export const customerGetAddressController = asyncErrors( async(req:addPincodeCus
     const customer = await CustomerModel.findOne({_id: req.user._id})
     if (!customer) return next(new ErrorHandler('Customer not found', 404))
 
-    // const addressDetails = customer.addressDetails.find(obj => obj.pincode === customer.pincode)
-
+    // const addressDetails = customer.addressDetails.find(obj => obj.pincode === customer.pincode)  
     res.status(200).json({"succes": true, addressDetails: customer.addressDetails})
 })
 
 export const customerSelectAddressController = asyncErrors( async(req:addPincodeCustomerAuthenticatedDto, res:Response, next:NextFunction): Promise<void> => {
-    const {pincode} = req.body
+    const {id} = req.params
     await CustomerModel.findOneAndUpdate(
         {
             _id: req.user._id,
-            'addressDetails.pincode': pincode
+            'addressDetails._id': id
         },
         {$set: {
-            pincode,
+            defaultAddress: id,
         }}
     )
     res.status(200).json({"succes": true, "message": "Address is selected successfully"})
-})
-
-export const customerUpdateAddressController = asyncErrors( async(req:addPincodeCustomerAuthenticatedDto, res:Response, next:NextFunction): Promise<void> => {
-    const {pincode, houseNumber, street, nearby, city, state} = req.body
-    await CustomerModel.findOneAndUpdate(
-        {
-            _id: req.user._id,
-            'addressDetails.pincode': pincode
-        },
-        {$set: {
-            'addressDetails.$.houseNumber': houseNumber,
-            'addressDetails.$.street': street,
-            'addressDetails.$.nearby': nearby,
-            'addressDetails.$.city': city,
-            'addressDetails.$.state': state,
-        }}
-    )
-    res.status(200).json({"succes": true, "message": "Address is updated successfully"})
 })
 
 export const customerAddAddressController = asyncErrors( async(req:addPincodeCustomerAuthenticatedDto, res:Response, next:NextFunction): Promise<void> => {
@@ -174,31 +169,39 @@ export const customerAddAddressController = asyncErrors( async(req:addPincodeCus
         },
     )
     if (!customer)  return next(new ErrorHandler('Customer not found', 404))
-    if (customer.addressDetails.find(obj => obj.pincode === pincode)) {
-        await CustomerModel.findOneAndUpdate(
-            {
-                _id: req.user._id,
-                'addressDetails.pincode': pincode
-            },
-            {$set: {
-                'addressDetails.$.houseNumber': houseNumber,
-                'addressDetails.$.street': street,
-                'addressDetails.$.nearby': nearby,
-                'addressDetails.$.city': city,
-                'addressDetails.$.state': state,
-            }}
-        )
-        res.status(200).json({"succes": true, "message": "Address is added successfully"})
-    }else{
-        customer.addressDetails.push({pincode, houseNumber, street, nearby, city, state})
-        customer.pincode = pincode
-        await customer?.save()
-        res.status(200).json({"succes": true, "message": "Address is added successfully"})
-    }
+    customer.addressDetails.push({pincode, houseNumber, street, nearby, city, state})
+    await customer.save()
+    res.status(200).json({"succes": true, "message": "Address is added successfully"})
 })
 
+export const customerUpdateAddressController = asyncErrors( async(req:addPincodeCustomerAuthenticatedDto, res:Response, next:NextFunction): Promise<void> => {
+    const {pincode, houseNumber, street, nearby, city, state} = req.body
+    const {id} = req.params
+   
+    await CustomerModel.findOneAndUpdate(
+        {
+            _id: req.user._id,
+            'addressDetails._id': id
+        },
+        {$set: {
+            'addressDetails.$.houseNumber': houseNumber,
+            'addressDetails.$.pincode': pincode,
+            'addressDetails.$.street': street,
+            'addressDetails.$.nearby': nearby,
+            'addressDetails.$.city': city,
+            'addressDetails.$.state': state,
+        }}
+    )
+    
+    // update cart address details
+    await updateCartAddressDetails(req.user._id, {pincode, houseNumber, street, nearby, city, state, _id: id}, next)
+
+    res.status(200).json({"succes": true, "message": "Address is updated successfully"})
+})
+
+
 export const customerRemoveAddressController = asyncErrors( async(req:addPincodeCustomerAuthenticatedDto, res:Response, next:NextFunction): Promise<void> => {
-    const {pincode} = req.body
+    const {id} = req.params
     const customer = await CustomerModel.findOne(
         {
             _id: req.user._id,
@@ -207,12 +210,15 @@ export const customerRemoveAddressController = asyncErrors( async(req:addPincode
 
     if (!customer) return next(new ErrorHandler('Customer not found', 404))
 
-    if (customer.addressDetails.length === 1 && customer.addressDetails[0].pincode === pincode) return next(new ErrorHandler('Can not remove address', 400)) 
+    if (customer.addressDetails.length === 1) return next(new ErrorHandler('Can not remove address', 400)) 
 
-    customer.addressDetails = customer.addressDetails.filter(obj => obj.pincode !== pincode)
-    if (customer.pincode === pincode) {
-        customer.pincode = customer.addressDetails[0].pincode || ""
+    customer.addressDetails = customer.addressDetails.filter((obj:any) => obj._id != id)
+    if (customer.defaultAddress == id) {
+        customer.defaultAddress = customer.addressDetails[0]._id || ""
     }
+
+    // changes in cart address details
+    await updateCartAddressOnRemove(req.user._id, id, customer.addressDetails[0], next)
 
     await customer.save()
     res.status(200).json({"succes": true, "message": "Address is updated successfully"})

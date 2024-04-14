@@ -88,7 +88,7 @@ export const specialGetOneController = asyncErrors( async(req:Request, res:Respo
 })
 
 export const specialGetAnimationController = asyncErrors( async(req:Request, res:Response, next:NextFunction): Promise<void> => {
-    const specials = await SpecialModel.find({type:"animation", images:{$ne: []}}, {_id:1, name:1, images:1, tagline:1, description:1})
+    const specials = await SpecialModel.find({type:"animation", images:{$ne: []}}, {_id:1, name:1, images:1, tagline:1, description:1}).sort({createdAt: -1})
     res.status(200).json({"success":true, specials})
 })
 
