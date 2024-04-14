@@ -54,6 +54,13 @@ app.get('/uploads/subCategory/:filename', (req, res) => {
     res.sendFile(imagePath);
 });
 
+// Handle requests for images in the query directory
+app.get('/uploads/query/:filename', (req, res) => {
+    const { filename } = req.params;
+    const imagePath = path.join(__dirname, '../uploads', 'query', filename);
+    res.sendFile(imagePath);
+});
+
 // Connect to Database
 connection();
 
