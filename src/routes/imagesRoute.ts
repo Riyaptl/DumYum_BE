@@ -11,7 +11,7 @@ router.use(authenticateUser)
 // Upload images
 router.post('/:id', authorizeUser(['admin']), uploadImagesMiddleware, uploadImagesController)
 
-// Update images
+// Update image
 router.post('/update/:id', authorizeUser(['admin']), uploadImagesMiddleware, updateImagesController)
 
 // Remove image

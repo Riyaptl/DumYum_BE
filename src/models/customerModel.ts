@@ -96,7 +96,7 @@ const CustomerSchema = new Schema<Customer>({
     },
     gender: {
         type: String,
-        enum: ['female', 'male', 'other'],
+        enum: ['Female', 'Male', 'Other', 'female', 'male', 'other'],
         trim: true,
     },
     birthdate: {
@@ -105,12 +105,12 @@ const CustomerSchema = new Schema<Customer>({
     },
     marraigeStatus: {
         type: String,
-        enum: ['married', 'unmarried'],
+        enum: ['Married', 'Unmarried', 'married', 'unmarried'],
         trim: true,
     },
     kidsStatus: {
         type: String,
-        enum: ['yes', 'no'],
+        enum: ['Yes', 'No', 'yes', 'no'],
         trim: true,
     },
     anniversary: {

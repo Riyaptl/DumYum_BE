@@ -142,7 +142,6 @@ export class UpdateCustomerDto {
 
     @IsOptional()
     @IsString()
-    @IsIn(['female', 'male', 'other'])
     gender?: string;
 
     @IsOptional()
@@ -151,7 +150,6 @@ export class UpdateCustomerDto {
 
     @IsOptional()
     @IsString()
-    @IsIn(['married', 'unmarried'])
     marraigeStatus?: string;
 
     @IsOptional()
