@@ -14,9 +14,10 @@ export interface ResetPassAuthenticatedInterface extends Request {
 
 // Reset password 
 export const resetPassController = asyncErrors( async (req:ResetPassAuthenticatedInterface, res:Response, next: NextFunction): Promise<void> =>{
+ 
     const {oldPassword, newPassword, confirmPassword} = req.body
   
-    // old password valid or not
+    // old password valid or 
     const valid = await bcrypt.compare(oldPassword, req.user.password)
     if (!valid) return next(new ErrorHandler('Invalid password', 400))
 
