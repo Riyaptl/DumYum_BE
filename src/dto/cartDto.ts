@@ -15,6 +15,22 @@ export class AddCartDto {
         this.quantity = quantity
     }
 }
+
+export class AddMessageDto {
+    @IsOptional()
+    @IsString()
+    orderFor?: string;
+    
+    @IsOptional()
+    @IsString()
+    message?: number;
+
+    constructor(orderFor: string, message: number){
+        this.orderFor = orderFor
+        this.message = message
+    }
+}
+
 class ClassItemsDto {
     @IsNotEmpty()
     @IsString()

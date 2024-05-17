@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response} from "express";
 import { asyncErrors } from "../middlewares/catchAsyncErrors";
 import { Cart, CartModel, PredefinedOrder } from "../models/cartModel";
-import { AddBucketCartInterface, AddCartInterface, RemoveCartInterface, SubCatQuantityInterface, UpdateQuantityCartInterface } from "../interfaces/cartInterface";
+import { AddBucketCartInterface, AddCartInterface, AddMessageInterface, RemoveCartInterface, SubCatQuantityInterface, UpdateQuantityCartInterface } from "../interfaces/cartInterface";
 import { ErrorHandler } from "../utils/errorHandler";
 import { findIdSubCat } from "./subCategoryController";
 import { Types } from "mongoose";
@@ -13,6 +13,11 @@ import { IsEmpty } from "class-validator";
 interface addCartAuthenticatedInterface extends Request {
     user: {pincode?: string, _id: string, _doc: any, addressDetails: any, state: string, city: string, defaultAddress: any}
     body: AddCartInterface
+}
+
+interface addMessageAuthenticatedInterface extends Request {
+    user: {_id: string}
+    body: AddMessageInterface
 }
 
 interface addBucketCartAuthenticatedInterface extends Request {
@@ -220,6 +225,22 @@ export const AddCartController =  asyncErrors( async(req:addCartAuthenticatedInt
         await cart.save()
         res.status(200).json({"success": true, "message": `${subCategory.name} has been added to your cart successfully`, quantity: subCatQuantity})
     }
+})
+
+export const AddMessageController =  asyncErrors( async(req:addMessageAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
+  
+    // find cart
+    let cart = await CartModel.findOne({customerId: req.user._id})
+    if (!cart) return next(new ErrorHandler('Cart not found', 404))
+
+    // Add message and orderFor
+    const {orderFor, message} = req.body
+    cart.message = message
+    cart.orderFor = orderFor
+
+    await cart.save()
+    res.status(200).json({"success": true, "message": ` Message has been saved successfully`, cart})
+    
 })
 
 export const AddBucketCartController =  asyncErrors( async(req:addBucketCartAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
@@ -440,6 +461,8 @@ export const UpdateAddressCartController =  asyncErrors( async(req:updateAddress
         {addressDetails},
         {new:true}
     )
+    console.log(cart);
+    
     if (!cart) return next( new ErrorHandler('Cart not found', 404))
     res.status(200).json({"success": true, "message": `Cart address has been updated successfully`, cart})
 })
@@ -455,7 +478,7 @@ export const CheckoutCartController =  asyncErrors( async(req:checkOutCartAuthen
     // find cart
     let cart = await CartModel.findOne({customerId: req.user._id})
     if (!cart) return next(new ErrorHandler('Cart not found', 404))
-        
+
     // check address if doesn't exist
     const requiredDetails = ['houseNumber', 'street', 'nearby', 'city', 'state', 'pincode', '_id']
     const address = cart.addressDetails._doc

@@ -5,14 +5,14 @@ import { validationMiddleware } from "../middlewares/validationDTO"
 import authenticateUser from "../middlewares/authenticateUser"
 const router = express.Router()
 
-// Apply authentication middleware
-router.use(authenticateUser)
-
 // send OTP 
 router.post('/send/OTP', validationMiddleware(sendOTPDto), sendOTPController)
 
 // Forgot password
 router.post('/forgot/pass', validationMiddleware(ForgotPassDto), forgotPassController)
+
+// Apply authentication middleware
+router.use(authenticateUser)
 
 // Reset password
 router.post('/reset/pass', validationMiddleware(ResetPassDto), resetPassController)

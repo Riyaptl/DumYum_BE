@@ -30,6 +30,7 @@ const ErrorFunction = (err:any, req:Request, res:Response, next:NextFunction) =>
         const message = `Json Web Token is expired, try again`
         err = new ErrorHandler(message, 400)
     }
+    
     res.status(err.statusCode).json({success: false, message: err.message})
 }
 

@@ -5,6 +5,11 @@ export interface AddCartInterface {
     quantity: number
 }
 
+export interface AddMessageInterface {
+    message?: string,
+    orderFor: "oneself" | 'other' | undefined
+}
+
 interface CartItems {
     subCategoryId: string
     quantity: number

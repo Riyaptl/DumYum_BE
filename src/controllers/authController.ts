@@ -16,19 +16,20 @@ export const checkEmailController = asyncErrors( async (req:Request, res:Respons
 
     //  if already exists
     const customer = await CustomerModel.findOne({email})
-    if (customer) return next(new ErrorHandler('Email Id already exists', 400)) 
+    if (customer) return next(new ErrorHandler('Email Id exists already', 400)) 
 
     const admin = await AdminModel.findOne({email})
-    if (admin) return next(new ErrorHandler('Email Id already exists', 400)) 
+    if (admin) return next(new ErrorHandler('Email Id exists already', 400)) 
 
+    
     res.status(200).json({"success": true, "message": "Email Id check passed"})
 })
 
-export const signUpController = asyncErrors( async (req:createCustomerAuthenticatedDto, res:Response, next: NextFunction): Promise<void> => {
-    
+export const signUpController = asyncErrors( async (req:createCustomerAuthenticatedDto, res:Response, next: NextFunction): Promise<void> => {    
     // customers only
     // when signup - create customer
     const userId = await customerCreateController(req, res, next)
+    
     if(userId){
         // create access token
         const payload = {userId}

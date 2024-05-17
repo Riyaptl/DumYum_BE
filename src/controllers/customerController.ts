@@ -70,7 +70,7 @@ export const findEmailCustomer = async (email:string, next:NextFunction)=> {
 export const customerCreateController = async (req:createCustomerAuthenticatedDto, res:Response, next:NextFunction) => {
     try {
 
-        const createCustomerInput = {...req.body}
+        const createCustomerInput = {...req.body}        
 
         // validate email
         if (!validateEmail(createCustomerInput.email)) return next(new ErrorHandler('Invalid Email Id', 400)) 
@@ -171,7 +171,7 @@ export const customerAddAddressController = asyncErrors( async(req:addPincodeCus
     if (!customer)  return next(new ErrorHandler('Customer not found', 404))
     customer.addressDetails.push({pincode, houseNumber, street, nearby, city, state})
     await customer.save()
-    res.status(200).json({"succes": true, "message": "Address is added successfully"})
+    res.status(200).json({"succes": true, "message": "Address is added successfully", address: customer.addressDetails})
 })
 
 export const customerUpdateAddressController = asyncErrors( async(req:addPincodeCustomerAuthenticatedDto, res:Response, next:NextFunction): Promise<void> => {

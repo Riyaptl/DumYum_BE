@@ -4,6 +4,8 @@ import { asyncErrors } from "../middlewares/catchAsyncErrors"
 import { ErrorHandler } from "../utils/errorHandler";
 import { AdminModel } from "../models/adminModel";
 import { CustomerModel } from "../models/customerModel";
+import {sendEmail} from '../utils/sendEmail'
+
 const bcrypt = require("bcrypt");
 
 export interface ResetPassAuthenticatedInterface extends Request {
@@ -35,16 +37,20 @@ export const resetPassController = asyncErrors( async (req:ResetPassAuthenticate
 // send otp
 export const sendOTPController = asyncErrors( async (req:any, res:Response, next: NextFunction): Promise<void> =>{
     const {email} = req.body
+    let isAdmin 
     let userExists = await AdminModel.findOne({email});
+    if(userExists) isAdmin = true
     if (!userExists) {
         userExists = await CustomerModel.findOne({email});
+        if(userExists) isAdmin = false
     }
+    
     if (!userExists) {
         return next(new ErrorHandler('User not found', 404))
     }
 
     const OTP = Math.floor(Math.random() * 900000) + 100000;
-    console.log(OTP)
+    // console.log(OTP)
     const message = `\nThank you for signing up with our platform. To complete your account verification, please use the following One-Time Password (OTP):\n\n OTP: ${OTP}\n\n Please enter this OTP in the designated field on our website to verify your account. Please note that this OTP is valid for a 10 miniutes only.\nIf you did not sign up for an account or have any concerns, please disregard this email.
       n\nThank you,\nDumYum`;
 
@@ -55,22 +61,40 @@ export const sendOTPController = asyncErrors( async (req:any, res:Response, next
         // <p>This is the content of the email.</p>`,
         text: message,
     };
+
+    try {
+        await sendEmail(mailOptions)
+    } catch (error:any) {
+        return next(new ErrorHandler(error.message, 500))
+    }
+
     // await this.emailsService.sendEmail(mailOptions);
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(OTP.toString(), salt);
-    await AdminModel.findOneAndUpdate(
-        { email },
-        {
-            $set: { otp: hash, otpGenerated: Date.now() },
-        },
-        { new: true },
-    );
+
+    if (isAdmin){
+        await AdminModel.findOneAndUpdate(
+            { email },
+            {
+                $set: { otp: hash, otpGenerated: Date.now() },
+            },
+            { new: true },
+        );
+    }else {
+        await CustomerModel.findOneAndUpdate(
+            { email },
+            {
+                $set: { otp: hash, otpGenerated: Date.now() },
+            },
+            { new: true },
+        );
+    }
     res.status(200).json({"success": true, "message": "OTP has been sent successfully"})
 })
 
 // verify otp
 export const forgotPassController = asyncErrors( async (req:any, res:Response, next: NextFunction): Promise<void> =>{
-    
+       
     const {otp, email, newPassword, confirmPassword} = req.body
     let user = await AdminModel.findOne({email})
     if (!user) {
@@ -79,12 +103,12 @@ export const forgotPassController = asyncErrors( async (req:any, res:Response, n
     if (!user) {
         return next(new ErrorHandler('User not found', 404))
     }
-
+    
     // Check if OTP has expired
     if (user.otpGeneratedAt && (Date.now() - new Date(user.otpGeneratedAt).getTime()) / 60000 > 10) {
         return next(new ErrorHandler('OTP Expired', 401))
     }
-
+    
       // If correct OTP
     if (!(await bcrypt.compare(otp, user.otp?.toString()))) {
         return next(new ErrorHandler('Invalid OTP. Please double-check the code you entered and try again.', 401))
@@ -94,7 +118,7 @@ export const forgotPassController = asyncErrors( async (req:any, res:Response, n
     if (newPassword !== confirmPassword) {
         return next(new ErrorHandler(`Passwords don't match`, 401))
     }
-
+    
       // Save user
     user.password = newPassword;
     await user.save();

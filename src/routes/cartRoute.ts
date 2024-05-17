@@ -1,7 +1,7 @@
 import express from "express"
-import { AddCartController, UpdateQuantityCartController, CheckoutCartController, DeleteCartController, GetCartController, RemoveSubCategoryCartController, SubCatIdsCartController, AddBucketCartController, UpdateAddressCartController } from "../controllers/cartController"
+import { AddCartController, UpdateQuantityCartController, CheckoutCartController, DeleteCartController, GetCartController, RemoveSubCategoryCartController, SubCatIdsCartController, AddBucketCartController, UpdateAddressCartController, AddMessageController } from "../controllers/cartController"
 import { validationMiddleware } from "../middlewares/validationDTO"
-import { AddBucketCartDto, AddCartDto, RemoveCartDto, SubCatQuantityDto, UpdateQuantityCartDto } from "../dto/cartDto"
+import { AddBucketCartDto, AddCartDto, AddMessageDto, CheckoutCartDto, RemoveCartDto, SubCatQuantityDto, UpdateQuantityCartDto } from "../dto/cartDto"
 import authenticateUser from "../middlewares/authenticateUser"
 import { AddressDetailsDto } from "../dto/customerDto"
 const router = express.Router()
@@ -22,6 +22,9 @@ router.use(authenticateUser)
 // Create / add
 router.post('/add', validationMiddleware(AddCartDto), AddCartController)
 
+// Create / add
+router.post('/message', validationMiddleware(AddMessageDto), AddMessageController)
+
 // Create / add bucket
 router.post('/bucket/add', validationMiddleware(AddBucketCartDto), AddBucketCartController)
 
@@ -41,7 +44,7 @@ router.post('/delete', DeleteCartController)
 router.post('/update/address', validationMiddleware(AddressDetailsDto), UpdateAddressCartController)
 
 // Checkout
-router.post('/checkout', CheckoutCartController)
+router.post('/checkout', validationMiddleware(CheckoutCartDto), CheckoutCartController)
 
 // Get array subCategory ids existing in cart of logged in user
 router.post('/subCat/quantity', validationMiddleware(SubCatQuantityDto), SubCatIdsCartController)
