@@ -6,9 +6,13 @@ export class CreateSubCategoryDto{
     @IsString()
     name!: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    category!: string;
+    category?: string;
+    
+    @IsOptional()
+    @IsString()
+    special?: string;
 
     @IsOptional()
     @IsString()
@@ -47,12 +51,13 @@ export class CreateSubCategoryDto{
     @IsString()
     quantity?: string;
 
-    constructor(name: string, description: string, tagline: string, tags: string[], category: string, etp: string, costPrice: string, sellingPrice: string, discount: string, gst: string, quantity: string){
+    constructor(name: string, description: string, tagline: string, tags: string[], category: string, special:string, etp: string, costPrice: string, sellingPrice: string, discount: string, gst: string, quantity: string){
         this.name = name
         this.description = description
         this.tagline = tagline
         this.tags = tags
         this.category = category
+        this.special = special
         this.etp = etp
         this.costPrice = costPrice
         this.sellingPrice = sellingPrice

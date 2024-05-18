@@ -15,6 +15,7 @@ import { RatingModel } from "../models/ratingModel"
 import { uploadImagesMiddleware } from "../middlewares/uploadImges"
 import path from 'path'
 import fs from 'fs'
+import { findByNameSpecial } from "./specialController"
 
 // Update category name 
 export const updateSubCategoryRating = async (model:any, name: string, newName: string, next: NextFunction) =>{
@@ -93,12 +94,22 @@ export const validEntry = (entry:string, next: NextFunction) => {
 
 export const subCategoryCreateController = asyncErrors( async(req:createSubCategoryAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
     const createSubCategoryInput: CreateSubCategoryInterface = {...req.body}
-
-    // add category id
-    const category = await findByName(createSubCategoryInput.category, next)
-    if (!category) return next( new ErrorHandler('Category does not exist', 404))
-    createSubCategoryInput["categoryId"] =  category && category._id
-
+    let category
+    let special
+    if (createSubCategoryInput.category){
+        category = await findByName(createSubCategoryInput.category, next)
+        if (!category) return next( new ErrorHandler('Category does not exist', 404))
+        // add category id
+        createSubCategoryInput["categoryId"] =  category && category._id
+    }
+    else if (createSubCategoryInput.special){
+        special = await findByNameSpecial(createSubCategoryInput.special, next)
+        if (!special) return next( new ErrorHandler('Category does not exist', 404))
+        // add category id
+        createSubCategoryInput["categoryId"] =  special && special._id.toString()
+    }else{
+        return next(new ErrorHandler('Invalid Entry', 400))
+    }
     const {discount, gst, sellingPrice, ...other} = createSubCategoryInput
     
     // Valid entry for gst and discount
@@ -117,8 +128,15 @@ export const subCategoryCreateController = asyncErrors( async(req:createSubCateg
     const newSubCat = new SubCategoryModel(createSubCategoryInput)
 
     // add in to category
-    category.subCategories?.push(newSubCat._id)
-    await category.save()
+    if (category){
+        category.subCategories?.push(newSubCat._id)
+        await category.save()
+    }
+    if (special){
+        special.subCategories?.push(newSubCat._id)
+        await special.save()
+        
+    }
 
     // save
     await newSubCat.save()

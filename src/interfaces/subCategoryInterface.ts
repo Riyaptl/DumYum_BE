@@ -6,7 +6,8 @@ export interface CreateSubCategoryInterface{
     tagline?: string;
     tags?: string[];
     images?: string[];
-    category: string;
+    category?: string;
+    special?: string;
     categoryId: string;
     etp?: string;
     costPrice?: string ; 

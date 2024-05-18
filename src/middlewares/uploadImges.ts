@@ -3,7 +3,7 @@ import multer from 'multer';
 
 // Multer configuration for handling multiple file uploads
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {      
+    destination: function (req, file, cb) {            
         cb(null, `uploads/${req.query.page}`);
     },
     filename: function (req, file, cb) {

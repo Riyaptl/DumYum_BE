@@ -9,6 +9,7 @@ import { SpecialModel } from "../models/specialModel"
 import { SubCategoryModel } from "../models/subCategoryModel"
 import path from 'path'
 import fs from 'fs'
+import { findByName } from "./categoryController"
 
 interface createCategoryAuthenticatedInterface extends Request{
     user: {name?: string}
@@ -41,8 +42,22 @@ export const findIdSpecial = async (id:string, next:NextFunction) => {
     }
 }
 
+// find by name - subCategory
+export const findByNameSpecial = async (name:string, next:NextFunction) => {
+    try {
+        const special = await SpecialModel.findOne({name}, {__v:0})
+        return special
+    } catch (error) {
+        return next(new ErrorHandler('Internal Server Error', 500))
+    }
+}
+
 export const specialCreateController = asyncErrors( async (req:createCategoryAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
     const createCategoryInput: CreateCategoryInterface = {...req.body}
+
+    // If category of same name exists
+    const category = await findByName(createCategoryInput.name, next)
+    if (category) return next(new ErrorHandler('Category exists', 409))
 
     // createdBy
     createCategoryInput["createdBy"] = req.user.name
