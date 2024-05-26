@@ -37,6 +37,7 @@ const ReviewSchema = new Schema<Review>({
 
 interface Rating extends Document {
    category: string
+   special: string
    subCategory: string
    subCategoryId: Types.ObjectId
    review: Review[],
@@ -46,7 +47,10 @@ interface Rating extends Document {
 const RatingSchema = new Schema<Rating>({
     category: {
         type: String,
-        required: true,
+        trim: true
+    },
+    special: {
+        type: String,
         trim: true
     },
     subCategory: {

@@ -9,6 +9,7 @@ interface SubCategory extends Document {
     smallImages?: string[] | null;
     categoryId: Types.ObjectId ;
     category: string;
+    special: string;
     etp?: string | null;
     costPrice?: string | null; 
     sellingPrice?: string | null; 
@@ -57,6 +58,10 @@ const SubCategorySchema = new Schema<SubCategory>({
         ref: 'Category',
     },
     category: {
+        type: String,
+        trim: true,
+    },
+    special: {
         type: String,
         trim: true,
     },

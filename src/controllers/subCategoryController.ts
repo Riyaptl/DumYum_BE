@@ -15,7 +15,7 @@ import { RatingModel } from "../models/ratingModel"
 import { uploadImagesMiddleware } from "../middlewares/uploadImges"
 import path from 'path'
 import fs from 'fs'
-import { findByNameSpecial } from "./specialController"
+import { findByNameSpecial, removeSubCategorySpecial } from "./specialController"
 
 // Update category name 
 export const updateSubCategoryRating = async (model:any, name: string, newName: string, next: NextFunction) =>{
@@ -198,12 +198,32 @@ export const subCategoryUpdateBasicController = asyncErrors( async (req:updateBa
             newCat.subCategories?.push(subCategory._id)
             await newCat.save()
         }
+        // if special name changes
+        if (updateBasicInput.special){
 
-        const trackFields = ['category', 'name']
+            // if cat exists already - remove subCategory
+            if (subCategory.special){
+                await removeSubCategorySpecial(subCategory.categoryId.toString(), subCategory._id, next)
+            }
+
+            // find newSpecial
+            const newSpecial = await findByNameSpecial(updateBasicInput.special, next)
+            if (!newSpecial) return next( new ErrorHandler('Category does not exist', 404))
+
+            // set categoryId to newCat.id
+            updateBasicInput["categoryId"] =  newSpecial && newSpecial._id.toString()
+
+            // add sub category in newCat
+            newSpecial.subCategories?.push(subCategory._id)
+            await newSpecial.save()
+        }
+
+        const trackFields = ['category', 'name', 'special']
         const exists = trackFields.some(val => Object.keys(updateBasicInput).includes(val))
         if (exists){
             const obj = {
                 category: updateBasicInput.category || subCategory.category,
+                special: updateBasicInput.special || subCategory.special,
                 subCategory: updateBasicInput.name || subCategory.name
             }
             // changes in rating

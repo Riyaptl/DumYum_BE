@@ -49,8 +49,17 @@ export const ratingCreateController = asyncErrors( async (req:CreateRatingAuthen
     let ratingObj = await RatingModel.findOne({subCategoryId})
     if (!ratingObj) {
         const subCategory = await findIdSubCat(subCategoryId.toString(), next)
+        if (!subCategory){
+            return next(new ErrorHandler('Sub Category does not exists', 404))
+        }
         const name = subCategory && subCategory.name
-        ratingObj = new RatingModel({subCategoryId, subCategory: name, category: subCategory!.category})
+        if (subCategory.category){
+            ratingObj = new RatingModel({subCategoryId, subCategory: name, category: subCategory.category})
+        }else if (subCategory.special){
+            ratingObj = new RatingModel({subCategoryId, subCategory: name, special: subCategory.special})
+        }else{
+            return next(new ErrorHandler('Invalid entry', 400))
+        }
     }
 
     // add into respective ratingObj

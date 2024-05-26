@@ -52,6 +52,18 @@ export const findByNameSpecial = async (name:string, next:NextFunction) => {
     }
 }
 
+export const removeSubCategorySpecial = async (id: string, subCatId: string, next: NextFunction) => {
+    try {
+        const oldSpecial = await SpecialModel.findById(id)
+        if (!oldSpecial) return next( new ErrorHandler('Category does not exist', 404))
+        oldSpecial.subCategories = oldSpecial.subCategories?.filter(id => id.toString() != subCatId.toString())
+        await oldSpecial.save()
+        return
+    } catch (error) {
+        return next(new ErrorHandler('Internal Server Error', 500))
+    }
+}
+
 export const specialCreateController = asyncErrors( async (req:createCategoryAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
     const createCategoryInput: CreateCategoryInterface = {...req.body}
 

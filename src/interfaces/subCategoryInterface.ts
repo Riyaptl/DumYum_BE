@@ -45,7 +45,8 @@ export interface UpdateSubCategoryBasicInterface{
     description?: string;
     tagline?: string;
     images?: string[];
-    category: string; 
+    category?: string; 
+    special?: string; 
     categoryId: string; 
     quantity?: string;
     updatedBy?: string;

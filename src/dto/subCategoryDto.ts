@@ -118,6 +118,10 @@ export class UpdateSubCategoryBasicDto{
     @IsOptional()
     @IsString()
     category?: string;
+    
+    @IsOptional()
+    @IsString()
+    special?: string;
 
     @IsOptional()
     @IsString()
@@ -131,11 +135,12 @@ export class UpdateSubCategoryBasicDto{
     @IsString()
     quantity?: string;
 
-    constructor(name: string, description: string, tagline: string, category: string, quantity: string){
+    constructor(name: string, description: string, tagline: string, category: string, special: string, quantity: string){
         this.name = name
         this.description = description
         this.tagline = tagline
         this.category = category
+        this.special = special
         this.quantity = quantity
     }
 }

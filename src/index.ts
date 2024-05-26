@@ -12,6 +12,7 @@ const cors = require('cors')
 // Import routes
 import authRoute from "./routes/authRoute"
 import routes from "./routes"
+import inquiryRoutes from "./inquiryRoutes"
 import {ErrorFunction} from './middlewares/error'
 import authenticateUser from "./middlewares/authenticateUser";
 import bodyParser from 'body-parser';
@@ -73,7 +74,10 @@ app.listen(process.env.PORT, () => {
 // Auth
 app.use('/api/v1/auth', authRoute)
 
-// Admin Panel
+// Inquiry
+app.use('/api/v1/inquiry', inquiryRoutes)
+
+// Routes
 app.use('/api/v1', routes)
 
 // Global error handler
