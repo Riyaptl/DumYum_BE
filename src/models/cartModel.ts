@@ -4,6 +4,7 @@ import { AddressDetailsInterface, AddressDetailsSchema } from './customerModel';
 // PredefinedOrder Schema
 export interface PredefinedOrder {
     category?: string;
+    special?: string;
     subCategory?: string;
     subCategoryId?: Types.ObjectId;
     image?: string;
@@ -13,6 +14,10 @@ export interface PredefinedOrder {
 
 const PredefinedOrderSchema = new mongoose.Schema({
     category:{
+        type:String,
+        trim: true
+    },
+    special:{
         type:String,
         trim: true
     },

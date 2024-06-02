@@ -195,6 +195,7 @@ export const AddCartController =  asyncErrors( async(req:addCartAuthenticatedInt
             // make predefinedObj 
             const predefinedObj:PredefinedOrder = {
                 category: subCategory.category,
+                special: subCategory.special,
                 subCategory: subCategory.name,
                 subCategoryId: new Types.ObjectId(subCategory._id),
                 quantity: +quantity,
@@ -450,7 +451,7 @@ export const RemoveSubCategoryCartController =  asyncErrors( async(req:removeCar
 export const GetCartController =  asyncErrors( async(req:getCartAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
     // get complete cart
     const cart = await CartModel.findOne({customerId: req.user._id})
-    if (!cart) return next( new ErrorHandler('Cart not found', 404))
+    // if (!cart) return next( new ErrorHandler('Cart not found', 404))
     res.status(200).json({"success": true, cart})
 })
 
@@ -476,9 +477,10 @@ export const DeleteCartController =  asyncErrors( async(req:deleteCartAuthentica
 
 export const CheckoutCartController =  asyncErrors( async(req:checkOutCartAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
     // find cart
+      
     let cart = await CartModel.findOne({customerId: req.user._id})
     if (!cart) return next(new ErrorHandler('Cart not found', 404))
-
+        
     // check address if doesn't exist
     const requiredDetails = ['houseNumber', 'street', 'nearby', 'city', 'state', 'pincode', '_id']
     const address = cart.addressDetails._doc
@@ -502,7 +504,8 @@ export const CheckoutCartController =  asyncErrors( async(req:checkOutCartAuthen
 
     // go through all subCategories
     interface predefined {
-        category: string | undefined;
+        category?: string | undefined;
+        special?: string | undefined;
         subCategory: string | undefined;
         quantity?: number;
         price?: string | null;
@@ -512,14 +515,16 @@ export const CheckoutCartController =  asyncErrors( async(req:checkOutCartAuthen
         // create preDefinedOrderObj
         const preDefinedOrderObj = {
             category: obj.category,
+            special: obj.special,
             subCategory: obj.subCategory,
             subCategoryId: obj.subCategoryId,
             price: obj.price,
-            quantity: obj.quantity
+            quantity: obj.quantity,
+            image: obj.image
         }
         preDefinedOrder.push({...preDefinedOrderObj})
     })
-
+    
     // create orderObj
     const orderObj:CreateOrderInterface = {
         customerId: req.user._id,
@@ -536,10 +541,15 @@ export const CheckoutCartController =  asyncErrors( async(req:checkOutCartAuthen
     }
 
     req.body = orderObj
-    await orderCreateController(req, res, next) 
+    
+    try {
+        await orderCreateController(req, res, next) 
+    } catch (error:any) {
+        return next(new ErrorHandler(error.message || 'Something went wrong', error.statusCode || 500))
+    }
 
     // empty cart
-    await CartModel.findOneAndDelete({customerId: req.user._id})
+    // await CartModel.findOneAndDelete({customerId: req.user._id})
 
     res.status(200).json({"success": true,"message": "order is placed successfully"})
 })

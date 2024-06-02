@@ -5,6 +5,10 @@ export class CreateQueryDto {
     @IsNotEmpty()
     @IsString()
     title: string
+   
+    @IsNotEmpty()
+    @IsString()
+    orderId: string
 
     @IsOptional()
     @IsString()
@@ -14,8 +18,9 @@ export class CreateQueryDto {
     @IsString()
     image?: string
 
-    constructor(title: string, description: string, image: string){
+    constructor(title: string, orderId: string, description: string, image: string){
         this.title = title
+        this.orderId = orderId
         this.description = description
         this.image = image
     }

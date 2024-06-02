@@ -118,6 +118,11 @@ export const orderGetAllController = asyncErrors( async(req:getOrderAuthenticate
     res.status(200).json({"success":true, orders})
 })
 
+export const orderGetCustController = asyncErrors( async(req:getOrderAuthenticatedInterface, res:Response): Promise<void> => {
+    const orders = await OrderModel.find({customerId: req.user._id}, {orderId:1})
+    res.status(200).json({"success":true, orders})
+})
+
 export const orderGetAllCustController = asyncErrors( async(req:getOrderAuthenticatedInterface, res:Response): Promise<void> => {
     const customerId = req.user._id
     const orders = await OrderModel.find({customerId}).select({orderFor:1, finalPrice:1, totalQuantity:1, createdAt:1, delivered:1, orderStatus:1, paymentStatus:1, paymentMethod:1}).sort({createdAt:-1})

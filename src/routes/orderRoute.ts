@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express"
-import { exportDataOrders, orderCloseController, orderCustomerController, orderGetAllController, orderGetAllCustController, orderGetOneController, orderUpdatePaymentController, orderUpdatePriceController, orderUpdateTimeController } from "../controllers/orderController"
+import { exportDataOrders, orderCloseController, orderCustomerController, orderGetAllController, orderGetAllCustController, orderGetCustController, orderGetOneController, orderUpdatePaymentController, orderUpdatePriceController, orderUpdateTimeController } from "../controllers/orderController"
 import { validationMiddleware } from "../middlewares/validationDTO"
 import { GetDataDto } from "../dto/adminDto"
 import { UpdatePaymentOrderDto, UpdatePriceOrderDto, UpdateTimeOrderDto } from "../dto/orderDto"
@@ -24,6 +24,9 @@ router.get('/customer', validationMiddleware(GetDataDto), orderGetAllCustControl
 
 // Get all orders
 router.get('/', validationMiddleware(GetDataDto), orderGetAllController)
+
+// Get all orders - of a customer for website
+router.get('/cust_orders', orderGetCustController)
 
 // Get predefined orders of single 
 router.get('/predefined/:id', orderGetOneController)

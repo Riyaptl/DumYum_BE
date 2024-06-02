@@ -2,6 +2,7 @@
 
 export interface CreateQueryInterface {
     title: string
+    orderId: string
     description?: string
     image?: string
     queryId?: string

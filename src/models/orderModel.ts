@@ -49,9 +49,11 @@ const CustomisedOrderSchema = new Schema<CustomisedOrder>(
 
 // PredefinedOrder Schema
 export interface PredefinedOrder {
-    category: string | undefined;
+    category?: string | undefined;
+    special?: string | undefined;
     subCategory: string | undefined;
     subCategoryId?: Types.ObjectId;
+    image?: string;
     quantity?: number;
     price?: string | null;
 }
@@ -60,7 +62,10 @@ export const PredefinedOrderSchema = new Schema<PredefinedOrder>(
     {
         category: {
             type: String,
-            required: true,
+            trim: true,
+        },
+        special: {
+            type: String,
             trim: true,
         },
         subCategory: {
@@ -71,6 +76,10 @@ export const PredefinedOrderSchema = new Schema<PredefinedOrder>(
         subCategoryId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "SubCategory"
+        },
+        image: {
+            type: String,
+            trim: true,
         },
         quantity: {
             type: Number,

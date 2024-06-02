@@ -2,6 +2,7 @@ import mongoose, { Document, Schema, model, Types } from 'mongoose';
 
 interface Query extends Document {
     queryId: string;
+    orderId: string;
     seq: string;
     title: string;
     description?: string | null;
@@ -18,8 +19,12 @@ interface Query extends Document {
 
 const QuerySchema = new Schema<Query>({
     queryId: {
-        type: String, 
-        trim: true
+       type: String, 
+         trim: true
+    },
+    orderId: {
+       type: String, 
+         trim: true
     },
     seq: {
         type: String,
