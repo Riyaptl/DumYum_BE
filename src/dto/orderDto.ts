@@ -1,4 +1,4 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsIn, IsNotEmpty, IsOptional, IsString, isIBAN } from "class-validator";
 
 export class UpdateTimeOrderDto{
 
@@ -37,7 +37,9 @@ export class UpdatePaymentOrderDto{
 
     @IsOptional()
     @IsString()
+    @IsIn(['UPI', 'Cash'])
     paymentMethod?: string;
+
     constructor(paymentStatus: string, paymentMethod: string){
         this.paymentStatus = paymentStatus,
         this.paymentMethod = paymentMethod
@@ -51,7 +53,13 @@ export class ClosePaymentOrderDto{
     @IsIn(['closed', 'cancelled'])
     type: string;
 
-    constructor(type: string){
+    @IsOptional()
+    @IsString()
+    @IsIn(['UPI', 'Cash On Delivery'])
+    paymentMethod?: string;
+
+    constructor(type: string, paymentMethod: string){
         this.type = type
+        this.paymentMethod = paymentMethod
     }
 }

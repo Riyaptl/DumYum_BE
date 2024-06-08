@@ -2,7 +2,7 @@ import express, {Request, Response} from "express"
 import { exportDataOrders, orderCloseController, orderCustomerController, orderGetAllController, orderGetAllCustController, orderGetCustController, orderGetOneController, orderUpdatePaymentController, orderUpdatePriceController, orderUpdateTimeController } from "../controllers/orderController"
 import { validationMiddleware } from "../middlewares/validationDTO"
 import { GetDataDto } from "../dto/adminDto"
-import { UpdatePaymentOrderDto, UpdatePriceOrderDto, UpdateTimeOrderDto } from "../dto/orderDto"
+import { ClosePaymentOrderDto, UpdatePaymentOrderDto, UpdatePriceOrderDto, UpdateTimeOrderDto } from "../dto/orderDto"
 import authorizeUser from "../utils/authorizeUser"
 import authenticateUser from "../middlewares/authenticateUser"
 const router = express.Router()
@@ -41,7 +41,7 @@ router.post('/price/:id', authorizeUser(['admin']), validationMiddleware(UpdateP
 router.post('/payment/:id', authorizeUser(['admin']), validationMiddleware(UpdatePaymentOrderDto), orderUpdatePaymentController)
 
 // Close order
-router.post('/close/:id', validationMiddleware(UpdatePaymentOrderDto), authorizeUser(['admin']), orderCloseController)
+router.post('/close/:id', validationMiddleware(ClosePaymentOrderDto), authorizeUser(['admin']), orderCloseController)
 
 // Get customer details
 router.get('/customer/:id', authorizeUser(['admin']),  orderCustomerController)

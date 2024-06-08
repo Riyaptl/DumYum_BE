@@ -162,6 +162,7 @@ export const AddCartController =  asyncErrors( async(req:addCartAuthenticatedInt
 
     // get subCategory
     const {subCategoryId, quantity} = req.body
+    
     if(quantity <= 0) return next(new ErrorHandler('Invalid entry', 400))
     
     const subCategory = await findIdSubCat(subCategoryId, next)
@@ -205,17 +206,17 @@ export const AddCartController =  asyncErrors( async(req:addCartAuthenticatedInt
             cart.predefinedOrder?.push(predefinedObj)
             subCatQuantity = predefinedObj.quantity
         }  
-
+        
+        
         // make cartObj - price, quantity, etp
         cart.totalPrice! += (+subCategory.finalPrice * +quantity)
         cart.totalQuantity! += +quantity
         cart.gstPrice! = cart.gst! * cart.totalPrice!
         cart.finalPrice! = cart.totalPrice! + cart.gstPrice!
         cart.etp! += (+subCategory.etp * +quantity)
-        
-        
-        const addressDetails = req.user.addressDetails.find((obj:any) => obj._id.toString() == req.user.defaultAddress.toString())
-        
+                
+        const addressDetails = req.user.addressDetails.find((obj:any) => obj._id.toString() == req.user.defaultAddress.toString())     
+
         cart.addressDetails = addressDetails
             // cart.addressDetails = location._id
             // cart.etd = location.etd
@@ -223,6 +224,9 @@ export const AddCartController =  asyncErrors( async(req:addCartAuthenticatedInt
             // cart.priceLimit = location.priceLimit || null
               
         // save changes
+        // console.log(cart);
+        
+
         await cart.save()
         res.status(200).json({"success": true, "message": `${subCategory.name} has been added to your cart successfully`, quantity: subCatQuantity})
     }
@@ -462,8 +466,7 @@ export const UpdateAddressCartController =  asyncErrors( async(req:updateAddress
         {addressDetails},
         {new:true}
     )
-    console.log(cart);
-    
+   
     if (!cart) return next( new ErrorHandler('Cart not found', 404))
     res.status(200).json({"success": true, "message": `Cart address has been updated successfully`, cart})
 })
@@ -540,7 +543,7 @@ export const CheckoutCartController =  asyncErrors( async(req:checkOutCartAuthen
         addressDetails: cart.addressDetails
     }
 
-    req.body = orderObj
+    req.body = orderObj 
     
     try {
         await orderCreateController(req, res, next) 
@@ -549,7 +552,7 @@ export const CheckoutCartController =  asyncErrors( async(req:checkOutCartAuthen
     }
 
     // empty cart
-    // await CartModel.findOneAndDelete({customerId: req.user._id})
+    await CartModel.findOneAndDelete({customerId: req.user._id})
 
     res.status(200).json({"success": true,"message": "order is placed successfully"})
 })

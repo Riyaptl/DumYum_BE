@@ -122,7 +122,7 @@ interface Order extends Document {
     extraDiscount?: number;
     discountdPrice?: string | null;
     customerId: Types.ObjectId;
-    closedAt?: Date | null;
+    closedAt?: String;
     closedBy?: string;
     createdAt?: Date;
     updatedBy: string;
@@ -216,6 +216,7 @@ const OrderSchema = new Schema<Order>({
         type: String,
         enum: ['paid', 'unpaid'],
         trim: true,
+        default: 'unpaid'
     },
     paymentMethod: {
         type: String,
@@ -235,7 +236,7 @@ const OrderSchema = new Schema<Order>({
         ref: 'Customer',
     },
     closedAt: {
-        type: Date,
+        type: String,
     },
     closedBy: {
         type: String,

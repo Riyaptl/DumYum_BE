@@ -42,4 +42,5 @@ export interface CloseOrderInterface {
     closedAt?: Date;
     orderStatus?: string;
     delivered?: string;
+    paymentMethod?: 'UPI' | 'Cash'
 }

@@ -10,6 +10,7 @@ import { exportData } from "./adminController";
 import { ordersFileds } from "../headers";
 import { findIdCustomer } from "./customerController";
 import { LocationModel } from "../models/locationModel";
+import { AddressDetailsSchema } from "../models/customerModel";
 const {DateTime} = require('luxon')
 
 interface getOrderAuthenticatedInterface extends Request{
@@ -55,7 +56,8 @@ export const orderCreateController = asyncErrors(async (req: any, res:Response, 
     }else{
         seq = '1'
     }
-    const todayInIST = DateTime.now().setZone('Asia/Kolkata').toLocaleString(DateTime.DATE_SHORT);;
+    let todayInIST = DateTime.now().setZone('Asia/Kolkata')
+    todayInIST = todayInIST.toFormat('MM/dd/yyyy')
     const orderId = todayInIST+'_ORD_'+seq 
     createOrder["orderId"] = orderId
     createOrder["seq"] = seq
@@ -125,7 +127,7 @@ export const orderGetCustController = asyncErrors( async(req:getOrderAuthenticat
 
 export const orderGetAllCustController = asyncErrors( async(req:getOrderAuthenticatedInterface, res:Response): Promise<void> => {
     const customerId = req.user._id
-    const orders = await OrderModel.find({customerId}).select({orderFor:1, finalPrice:1, totalQuantity:1, createdAt:1, delivered:1, orderStatus:1, paymentStatus:1, paymentMethod:1}).sort({createdAt:-1})
+    const orders = await OrderModel.find({customerId}).select({finalPrice:1, totalPrice:1, totalQuantity:1, createdAt:1, delivered:1, orderStatus:1, paymentStatus:1, paymentMethod:1, orderId:1, addressDetails: 1, closedAt: 1}).sort({createdAt:-1})
     res.status(200).json({"success":true, orders})
 })
 
@@ -141,7 +143,7 @@ export const orderGetOneController = asyncErrors( async(req:any, res:Response): 
     const id = req.params.id
     const customerId = req.user._id
     const order = await OrderModel.findOne({_id:id, customerId})
-    res.status(200).json({"success":true, orders: order?.predefinedOrder})
+    res.status(200).json({"success":true, orders: order?.predefinedOrder || []})
 })
 
 
@@ -208,20 +210,35 @@ export const orderUpdatePaymentController = asyncErrors ( async(req:updatePaymen
 
 export const orderCloseController = asyncErrors ( async(req:closeAuthenticatedInterface, res:Response, next:NextFunction): Promise<void> => {
     const id = req.params.id
+
+    const {paymentMethod, type} = req.body
+        
     const order = await OrderModel.findById(id)
     if(!order) return next(new ErrorHandler('Order not found', 400))
 
-    // if allredy closed
+    // if alredy closed
     if (order.orderStatus !== 'active') return next(new ErrorHandler('Order is not active', 400)) 
-
-    const {type} = req.body
     
     // close - closedAt, closedBy, orderStatus
-    order.closedAt = new Date()
+    let todayInIST = DateTime.now().setZone('Asia/Kolkata')
+    todayInIST = todayInIST.toFormat('MM/dd/yyyy')
+    order.closedAt = todayInIST
     order.closedBy = req.user.name 
     order.orderStatus = type
 
     if (type === 'closed'){
+
+        // if payment is remaining
+        if (order.paymentStatus == 'unpaid' && !paymentMethod){
+            return next(new ErrorHandler('Payment is due', 400)) 
+        }
+
+        // if payment method is passed
+        if (paymentMethod){
+            order.paymentMethod = paymentMethod
+            order.paymentStatus = 'paid'
+        }
+
         // delivered
         const val = Math.floor(order.etp!) * 24 * 60 * 60 * 1000
         const expectedDate = order.createdAt!.getTime() + val 
